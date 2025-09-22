@@ -1,0 +1,114 @@
+@use '../../../styles/variables' as *;
+
+.apartmentDetail {
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: $spacing-lg;
+    
+    .headerLeft {
+      display: flex;
+      align-items: flex-start;
+      gap: $spacing-md;
+      
+      .backButton {
+        margin-top: 4px;
+      }
+      
+      .titleSection {
+        .title {
+          margin: 0 0 4px 0;
+          color: var(--text-color);
+        }
+      }
+    }
+  }
+  
+  .loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+  }
+  
+  .mainCard {
+    margin-bottom: $spacing-lg;
+    
+    .description {
+      margin-top: $spacing-lg;
+      padding-top: $spacing-lg;
+      border-top: 1px solid var(--border-color);
+      
+      h4 {
+        margin-bottom: $spacing-sm;
+        color: var(--text-color);
+      }
+    }
+  }
+  
+  .photosCard {
+    .photoGrid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: $spacing-sm;
+      
+      .photo {
+        border-radius: $border-radius-md;
+        overflow: hidden;
+      }
+    }
+  }
+  
+  .priceCard {
+    margin-bottom: $spacing-lg;
+    
+    .priceSection {
+      text-align: center;
+      
+      .price {
+        margin: 0;
+        color: $primary-color;
+        font-size: 32px;
+      }
+      
+      .priceNet {
+        font-size: 16px;
+      }
+    }
+  }
+  
+  .additionalCard {
+    margin-bottom: $spacing-lg;
+    
+    .documents {
+      margin-top: $spacing-xs;
+      display: flex;
+      flex-wrap: wrap;
+      gap: $spacing-xs;
+    }
+  }
+  
+  .agentCard {
+    margin-bottom: $spacing-lg;
+    
+    .agentInfo {
+      display: flex;
+      align-items: center;
+      gap: $spacing-sm;
+      
+      .agentIcon {
+        font-size: 24px;
+        color: $primary-color;
+      }
+    }
+  }
+  
+  .metaCard {
+    .metaItem {
+      display: flex;
+      align-items: center;
+      gap: $spacing-xs;
+    }
+  }
+}

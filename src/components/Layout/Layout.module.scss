@@ -1,0 +1,82 @@
+@use '../../styles/variables' as *;
+
+.layout {
+  min-height: 100vh;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 $spacing-md;
+  background: var(--bg-color);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-color);
+  
+  .icon {
+    font-size: 24px;
+    color: $primary-color;
+  }
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.themeToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: $border-radius-md;
+  background: transparent;
+  color: var(--text-color);
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: var(--bg-secondary);
+  }
+}
+
+.sidebar {
+  background: var(--bg-color) !important;
+  border-right: 1px solid var(--border-color) !important;
+}
+
+.content {
+  margin: $spacing-md;
+  padding: $spacing-md;
+  background: var(--bg-color);
+  border-radius: $border-radius-lg;
+  box-shadow: $box-shadow-sm;
+}
+
+.userMenu {
+  .userInfo {
+    padding: $spacing-sm;
+    
+    .userName {
+      font-weight: 600;
+      color: var(--text-color);
+    }
+    
+    .userRole {
+      font-size: 12px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+    }
+  }
+}

@@ -1,0 +1,41 @@
+@use '../../styles/variables' as *;
+
+.profile {
+  .profileCard {
+    margin-bottom: $spacing-lg;
+    
+    .profileHeader {
+      display: flex;
+      align-items: center;
+      gap: $spacing-md;
+      margin-bottom: $spacing-lg;
+      
+      .profileInfo {
+        flex: 1;
+        
+        .userName {
+          margin: 0 0 4px 0;
+          color: var(--text-color);
+        }
+      }
+    }
+    
+    .editButton {
+      width: 100%;
+    }
+    
+    .editForm {
+      margin-top: $spacing-md;
+    }
+  }
+  
+  .statsCard {
+    .ant-row {
+      margin-bottom: $spacing-md;
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+}

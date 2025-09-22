@@ -1,0 +1,41 @@
+@use '../../styles/variables' as *;
+
+.users {
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $spacing-lg;
+    
+    h2 {
+      margin: 0;
+      color: var(--text-color);
+    }
+  }
+  
+  .userInfo {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    
+    .userIcon {
+      font-size: 24px;
+      color: $primary-color;
+    }
+    
+    .userName {
+      font-weight: 600;
+      color: var(--text-color);
+    }
+    
+    .userEmail {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+  }
+  
+  .apartmentCount {
+    font-weight: 600;
+    color: $primary-color;
+  }
+}

@@ -1,0 +1,61 @@
+@use '../../styles/variables' as *;
+
+.loginContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.loginBox {
+  width: 100%;
+  max-width: 400px;
+  padding: $spacing-xl;
+  background: var(--bg-color);
+  border-radius: $border-radius-lg;
+  box-shadow: $box-shadow-lg;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-lg;
+  
+  .icon {
+    font-size: 32px;
+    color: $primary-color;
+  }
+  
+  .title {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-color);
+    margin: 0;
+  }
+}
+
+.subtitle {
+  text-align: center;
+  color: var(--text-secondary);
+  margin-bottom: $spacing-lg;
+}
+
+.form {
+  .formItem {
+    margin-bottom: $spacing-md;
+  }
+  
+  .submitButton {
+    width: 100%;
+    height: 44px;
+    font-size: 16px;
+    font-weight: 500;
+  }
+}
+
+.error {
+  margin-bottom: $spacing-md;
+}
