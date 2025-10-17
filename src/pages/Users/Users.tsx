@@ -17,14 +17,15 @@ import {
     Tooltip,
 } from "antd";
 import { UserAddOutlined, EditOutlined, LockOutlined, UnlockOutlined, UserOutlined } from "@ant-design/icons";
-import {
-    useGetUsersQuery,
-    useCreateUserMutation,
-    useUpdateUserMutation,
-    useToggleUserStatusMutation,
-} from "../../store/api/usersApi";
+
 import { User } from "../../types";
 import styles from "./Users.module.scss";
+import {
+    useCreateUserMutation,
+    useGetUsersQuery,
+    useToggleUserStatusMutation,
+    useUpdateUserMutation,
+} from "@/api/usersApi";
 
 const { Title } = Typography;
 const { Option } = Select;

@@ -4,13 +4,12 @@ import { UploadOutlined, SaveOutlined } from "@ant-design/icons";
 import { useNavigate, useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../store";
-import { useGetDirectoriesQuery } from "../../../store/api/directoriesApi";
 import {
     useCreateApartmentMutation,
-    useUpdateApartmentMutation,
     useGetApartmentQuery,
-} from "../../../store/api/apartmentsApi";
-import { Apartment } from "../../../types";
+    useUpdateApartmentMutation,
+} from "@/api/apartmentsApi";
+import { useGetDirectoriesQuery } from "@/api/directoriesApi";
 
 const { TextArea } = Input;
 const { Option } = Select;

@@ -11,11 +11,12 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store";
-import { useGetApartmentsQuery } from "../../store/api/apartmentsApi";
-import { useGetDirectoriesQuery } from "../../store/api/directoriesApi";
-import { Apartment, ApartmentFilters } from "../../types";
+
 import { formatPrice, getRoomLabel, getRepairLabel } from "../../utils/helpers";
 import styles from "./Dashboard.module.scss";
+import { useGetApartmentsQuery } from "@/api/apartmentsApi";
+import { Apartment, ApartmentFilters } from "@/types";
+import { useGetDirectoriesQuery } from "@/api/directoriesApi";
 
 const { Title } = Typography;
 

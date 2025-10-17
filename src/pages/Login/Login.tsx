@@ -30,7 +30,7 @@ const Login: React.FC = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { isLoading, error } = useSelector((state: RootState) => state.auth);
-    const [login] = useLoginMutation();
+    // const [login] = useLoginMutation();
 
     // const onFinish = async (values: LoginRequest) => {
     //     try {
@@ -65,7 +65,6 @@ const Login: React.FC = () => {
         <div className={styles.loginContainer}>
             <div className={styles.loginBox}>
                 <div className={styles.logo}>
-                    {/* <BuildingOutlined className={styles.icon} /> */}
                     <h1 className={styles.title}>Дежурка</h1>
                 </div>
 

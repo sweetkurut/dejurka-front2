@@ -10,7 +10,6 @@ import {
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../store";
-import { useGetApartmentQuery } from "../../../store/api/apartmentsApi";
 import {
     formatPrice,
     getRoomLabel,
@@ -19,6 +18,7 @@ import {
     formatDate,
 } from "../../../utils/helpers";
 import styles from "./ApartmentDetail.module.scss";
+import { useGetApartmentQuery } from "@/api/apartmentsApi";
 
 const { Title, Text } = Typography;
 

@@ -30,7 +30,6 @@ const Layout: React.FC = () => {
 
     // ...
     const getMenuItems = () => {
-        // Определяем базовые пункты меню, которые доступны всем
         const menuItems = [
             {
                 key: "/dashboard",
@@ -54,12 +53,11 @@ const Layout: React.FC = () => {
             },
         ];
 
-        // Если роль пользователя - "admin", добавляем дополнительные пункты
         if (user?.role === "admin") {
             menuItems.push(
                 {
                     key: "/users",
-                    icon: <UserOutlined />, // Лучше использовать UsersOutlined для списка пользователей
+                    icon: <UserOutlined />,
                     label: "Сотрудники",
                 },
                 {
@@ -70,7 +68,6 @@ const Layout: React.FC = () => {
             );
         }
 
-        // В конце добавляем "Профиль", который доступен всем
         menuItems.push({
             key: "/profile",
             icon: <UserOutlined />,
@@ -114,10 +111,7 @@ const Layout: React.FC = () => {
     return (
         <AntLayout className={styles.layout}>
             <Header className={styles.header}>
-                <div className={styles.logo}>
-                    {/* <BuildingOutlined className={styles.icon} /> */}
-                    Дежурка
-                </div>
+                <div className={styles.logo}>Дежурка</div>
 
                 <div className={styles.headerActions}>
                     <Button
@@ -127,13 +121,13 @@ const Layout: React.FC = () => {
                         className={styles.themeToggle}
                     />
 
+                    <div className={styles.userInfo}>
+                        <div className={styles.userName}>{user?.fullName}</div>
+                    </div>
+
                     <Dropdown menu={{ items: userMenuItems }} trigger={["click"]} placement="bottomRight">
                         <div className={styles.userMenu}>
                             <Avatar icon={<UserOutlined />} />
-                            <div className={styles.userInfo}>
-                                <div className={styles.userName}>{user?.fullName}</div>
-                                <div className={styles.userRole}>{user?.role}</div>
-                            </div>
                         </div>
                     </Dropdown>
                 </div>
