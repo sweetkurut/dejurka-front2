@@ -16,12 +16,20 @@ import {
     Popconfirm,
     Tooltip,
 } from "antd";
-import { UserAddOutlined, EditOutlined, LockOutlined, UnlockOutlined, UserOutlined } from "@ant-design/icons";
+import {
+    UserAddOutlined,
+    EditOutlined,
+    LockOutlined,
+    UnlockOutlined,
+    UserOutlined,
+    DeleteOutlined,
+} from "@ant-design/icons";
 
 import { User } from "../../types";
 import styles from "./Users.module.scss";
 import {
     useCreateUserMutation,
+    useDeleteUserMutation,
     useGetUsersQuery,
     useToggleUserStatusMutation,
     useUpdateUserMutation,
@@ -41,46 +49,54 @@ const Users: React.FC = () => {
     const [createUser, { isLoading: isCreating }] = useCreateUserMutation();
     const [updateUser, { isLoading: isUpdating }] = useUpdateUserMutation();
     const [toggleUserStatus] = useToggleUserStatusMutation();
+    const [deleteUser] = useDeleteUserMutation();
 
-    console.log(users);
+    const handleToggleStatus = async (userId: string) => {
+        try {
+            await toggleUserStatus(userId).unwrap();
+            message.success("Статус пользователя изменен");
+        } catch {
+            message.error("Ошибка при изменении статуса");
+        }
+    };
+
+    const handleDelete = async (userId: string) => {
+        try {
+            await deleteUser(userId).unwrap();
+            message.success("Пользователь удалён");
+        } catch {
+            message.error("Ошибка при удалении");
+        }
+    };
 
     const columns = [
         {
             title: "Email",
-            dataIndex: "fullName",
-            key: "fullName",
-            render: (name: string, record: User) => (
+            dataIndex: "email",
+            key: "email",
+            render: (email: string, record: User) => (
                 <div className={styles.userInfo}>
                     <UserOutlined className={styles.userIcon} />
                     <div>
-                        <div className={styles.userName}>{name}</div>
-                        <div className={styles.userEmail}>{record.email}</div>
+                        <div className={styles.userName}>{record.fullName}</div>
+                        <div className={styles.userEmail}>{email}</div>
                     </div>
                 </div>
             ),
         },
-
         {
             title: "ФИО",
             dataIndex: "full_name",
             key: "full_name",
-            render: (fullName: string) => <span>{fullName}</span>,
         },
-
         {
             title: "Роль",
             dataIndex: "role",
             key: "role",
             width: 120,
             render: (role: string) => {
-                const roleColors = {
-                    admin: "red",
-                    agent: "blue",
-                };
-                const roleLabels = {
-                    admin: "Администратор",
-                    agent: "Агент",
-                };
+                const roleColors = { admin: "red", agent: "blue" };
+                const roleLabels = { admin: "Администратор", agent: "Агент" };
                 return (
                     <Tag color={roleColors[role as keyof typeof roleColors]}>
                         {roleLabels[role as keyof typeof roleLabels]}
@@ -88,13 +104,6 @@ const Users: React.FC = () => {
                 );
             },
         },
-        // {
-        //     title: "Объектов",
-        //     dataIndex: "apartmentCount",
-        //     key: "apartmentCount",
-        //     width: 100,
-        //     render: (count: number) => <span className={styles.apartmentCount}>{count}</span>,
-        // },
         {
             title: "Статус",
             dataIndex: "isActive",
@@ -114,38 +123,26 @@ const Users: React.FC = () => {
         {
             title: "Действия",
             key: "actions",
-            width: 150,
-            render: (_, record: User) => (
-                <Space size="small">
-                    {currentUser?.role === "admin" && (
-                        <>
-                            <Tooltip title="Редактировать">
-                                <Button
-                                    type="text"
-                                    icon={<EditOutlined />}
-                                    onClick={() => handleEdit(record)}
-                                />
-                            </Tooltip>
-                            <Tooltip title={record.isActive ? "Заблокировать" : "Разблокировать"}>
-                                <Popconfirm
-                                    title={`${
-                                        record.isActive ? "Заблокировать" : "Разблокировать"
-                                    } пользователя?`}
-                                    onConfirm={() => handleToggleStatus(record.id)}
-                                    okText="Да"
-                                    cancelText="Отмена"
-                                >
-                                    <Button
-                                        type="text"
-                                        icon={record.isActive ? <LockOutlined /> : <UnlockOutlined />}
-                                        danger={record.isActive}
-                                    />
-                                </Popconfirm>
-                            </Tooltip>
-                        </>
-                    )}
-                </Space>
-            ),
+            width: 180,
+            render: (_, record: User) =>
+                currentUser?.role === "admin" && (
+                    <Space size="small">
+                        <Tooltip title="Редактировать">
+                            <Button type="text" icon={<EditOutlined />} onClick={() => handleEdit(record)} />
+                        </Tooltip>
+
+                        <Tooltip title="Удалить пользователя">
+                            <Popconfirm
+                                title="Удалить этого пользователя?"
+                                onConfirm={() => handleDelete(record.id)}
+                                okText="Да"
+                                cancelText="Отмена"
+                            >
+                                <Button type="text" danger icon={<DeleteOutlined />} />
+                            </Popconfirm>
+                        </Tooltip>
+                    </Space>
+                ),
         },
     ];
 
@@ -161,15 +158,6 @@ const Users: React.FC = () => {
         setIsModalVisible(true);
     };
 
-    const handleToggleStatus = async (userId: string) => {
-        try {
-            await toggleUserStatus(userId).unwrap();
-            message.success("Статус пользователя изменен");
-        } catch (error) {
-            message.error("Ошибка при изменении статуса");
-        }
-    };
-
     const handleSubmit = async (values: any) => {
         try {
             if (editingUser) {
@@ -181,7 +169,7 @@ const Users: React.FC = () => {
             }
             setIsModalVisible(false);
             form.resetFields();
-        } catch (error) {
+        } catch {
             message.error("Ошибка при сохранении");
         }
     };
@@ -218,7 +206,7 @@ const Users: React.FC = () => {
             >
                 <Form form={form} layout="vertical" onFinish={handleSubmit} autoComplete="off">
                     <Form.Item
-                        name="fullName"
+                        name="full_name"
                         label="ФИО"
                         rules={[{ required: true, message: "Введите ФИО" }]}
                     >
@@ -261,7 +249,7 @@ const Users: React.FC = () => {
                     )}
 
                     <Form.Item name="isActive" valuePropName="checked" initialValue={true}>
-                        <Switch /> Активный пользователь
+                        <Switch checkedChildren="Активный" unCheckedChildren="Неактивный" />
                     </Form.Item>
 
                     <Form.Item>

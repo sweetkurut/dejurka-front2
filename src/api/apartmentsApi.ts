@@ -2,9 +2,9 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { Apartment, ApartmentFilters } from "../types";
 
 const baseQuery = fetchBaseQuery({
-    baseUrl: "/api/apartments",
+    baseUrl: "http://localhost:3000/properties",
     prepareHeaders: (headers, { getState }) => {
-        const token = (getState() as any).auth.token;
+        const token = (getState() as any).auth.accessToken;
         if (token) {
             headers.set("authorization", `Bearer ${token}`);
         }

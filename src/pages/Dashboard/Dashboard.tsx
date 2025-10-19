@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from "react";
 import { Typography, Card, Statistic, Table, Input, Select, Button, Space, Tag, Tooltip } from "antd";
 import {
@@ -45,7 +46,7 @@ const Dashboard: React.FC = () => {
             key: "id",
             width: 80,
             render: (id: string) => (
-                <Button type="link" onClick={() => navigate(`/apartments/${id}`)}>
+                <Button type="link" onClick={() => navigate(`/${id}`)}>
                     #{id.slice(-6)}
                 </Button>
             ),
@@ -58,69 +59,60 @@ const Dashboard: React.FC = () => {
         },
         {
             title: "Серия",
-            dataIndex: "series",
             key: "series",
+            render: (_: any, record: any) => record.series?.name || "—",
             width: 120,
         },
         {
             title: "Район",
-            dataIndex: "district",
             key: "district",
+            render: (_: any, record: any) => record.district?.name || "—",
             width: 150,
         },
         {
             title: "Комнат",
-            dataIndex: "rooms",
-            key: "rooms",
+            key: "rooms_count",
+            render: (_: any, record: any) => record.rooms_count.count || "—",
             width: 80,
-            render: (rooms: number) => getRoomLabel(rooms),
         },
         {
             title: "Площадь",
-            dataIndex: "totalArea",
-            key: "totalArea",
+            dataIndex: "area_total",
+            key: "area_total",
             width: 100,
             render: (area: number) => `${area} м²`,
         },
         {
             title: "Этаж",
-            dataIndex: "floor",
-            key: "floor",
+            dataIndex: "floor_type",
+            key: "floor_type",
             width: 100,
-            render: (floor: number, record: Apartment) => `${floor}/${record.totalFloors}`,
         },
         {
             title: "Ремонт",
-            dataIndex: "repair",
-            key: "repair",
+            key: "renovation_type",
+            render: (_: any, record: any) => record.renovation_type?.name || "—",
             width: 120,
-            render: (repair: string) => <Tag color={getRepairColor(repair)}>{getRepairLabel(repair)}</Tag>,
         },
         {
-            title: "Цена",
-            dataIndex: "price",
-            key: "price",
+            title: "Цена (публ.)",
+            dataIndex: "price_visible",
+            key: "price_visible",
             width: 120,
-            render: (price: number) => formatPrice(price),
+            render: (price: number) => `${price.toLocaleString()} $`,
         },
         {
-            title: "Агент",
-            dataIndex: ["user", "fullName"],
-            key: "user",
+            title: "Создал",
+            key: "created_by",
             width: 150,
-            ellipsis: true,
-            render: (name: string, record: Apartment) => {
-                // Агенты видят только свои объекты, поэтому не показываем колонку агента
-                if (user?.role === "agent") return null;
-                return name;
-            },
+            render: (_: any, record: any) => record.created_by?.full_name || "—",
         },
         {
             title: "Действия",
             key: "actions",
             width: 100,
-            render: (_, record: Apartment) => (
-                <Space size="small" className={styles.tableActions}>
+            render: (_: any, record: any) => (
+                <Space size="small">
                     <Tooltip title="Просмотр">
                         <Button
                             type="text"

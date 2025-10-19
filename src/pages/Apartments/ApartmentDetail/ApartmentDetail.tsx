@@ -19,6 +19,7 @@ import {
 } from "../../../utils/helpers";
 import styles from "./ApartmentDetail.module.scss";
 import { useGetApartmentQuery } from "@/api/apartmentsApi";
+import dayjs from "dayjs";
 
 const { Title, Text } = Typography;
 
@@ -204,11 +205,11 @@ const ApartmentDetail: React.FC = () => {
                         <Space direction="vertical" size="small">
                             <div className={styles.metaItem}>
                                 <CalendarOutlined />
-                                <Text type="secondary">Создано: {formatDate(apartment.createdAt)}</Text>
+                                <Text type="secondary">Создано: {apartment.createdAt}</Text>
                             </div>
                             <div className={styles.metaItem}>
                                 <CalendarOutlined />
-                                <Text type="secondary">Обновлено: {formatDate(apartment.updatedAt)}</Text>
+                                <Text type="secondary">Обновлено: {apartment.updatedAt}</Text>
                             </div>
                         </Space>
                     </Card>
