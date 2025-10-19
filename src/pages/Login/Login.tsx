@@ -1,65 +1,57 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 import { Form, Input, Button, Alert } from "antd";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { RootState } from "../../store";
-import { useLoginMutation } from "../../store/api/authApi";
 import { loginStart, loginSuccess, loginFailure } from "../../store/slices/authSlice";
 import { LoginRequest } from "../../types";
 import styles from "./Login.module.scss";
-
-const mockUsers = [
-    {
-        email: "admin@example.com",
-        password: "admin123",
-        role: "admin",
-        token: "mock-admin-token",
-        fullName: "Администратор Системы",
-    },
-    {
-        email: "agent@example.com",
-        password: "agent123",
-        role: "agent",
-        token: "mock-agent-token",
-        fullName: "Агент Иванов",
-    },
-];
+import { useLoginMutation } from "@/api/authApi";
 
 const Login: React.FC = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { isLoading, error } = useSelector((state: RootState) => state.auth);
-    // const [login] = useLoginMutation();
-
-    // const onFinish = async (values: LoginRequest) => {
-    //     try {
-    //         dispatch(loginStart());
-    //         const response = await login(values).unwrap();
-    //         dispatch(loginSuccess(response));
-    //         navigate("/dashboard");
-    //     } catch (err: any) {
-    //         dispatch(loginFailure(err.data?.message || "Ошибка авторизации"));
-    //     }
-    // };
+    const [login] = useLoginMutation();
 
     const onFinish = async (values: LoginRequest) => {
         try {
             dispatch(loginStart());
+            const response = await login(values).unwrap();
+            console.log("✅ Response:", response);
 
-            const user = mockUsers.find((u) => u.email === values.email && u.password === values.password);
+            dispatch(loginSuccess(response));
+            console.log("✅ Navigate запускается");
 
-            if (!user) {
-                throw new Error("Неверный email или пароль");
+            const role = response.user.role;
+            if (role === "admin" || role === "agent") {
+                navigate("/dashboard", { replace: true });
             }
-
-            // Успешный вход
-            dispatch(loginSuccess({ user, token: user.token })); // <-- важно
-            navigate("/dashboard");
         } catch (err: any) {
-            dispatch(loginFailure(err.message || "Ошибка авторизации"));
+            console.error("❌ Ошибка авторизации:", err);
+            dispatch(loginFailure(err.data?.message || "Ошибка авторизации"));
         }
     };
+
+    // const onFinish = async (values: LoginRequest) => {
+    //     try {
+    //         dispatch(loginStart());
+
+    //         const user = mockUsers.find((u) => u.email === values.email && u.password === values.password);
+
+    //         if (!user) {
+    //             throw new Error("Неверный email или пароль");
+    //         }
+
+    //         // Успешный вход
+    //         dispatch(loginSuccess({ user, token: user.token })); // <-- важно
+    //         navigate("/dashboard");
+    //     } catch (err: any) {
+    //         dispatch(loginFailure(err.message || "Ошибка авторизации"));
+    //     }
+    // };
 
     return (
         <div className={styles.loginContainer}>

@@ -10,9 +10,9 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles = ["admin", "agent"] }) => {
-    const { user, token } = useSelector((state: RootState) => state.auth);
+    const { user, accessToken } = useSelector((state: RootState) => state.auth);
 
-    if (!token) {
+    if (!accessToken) {
         return <Navigate to="/login" replace />;
     }
 

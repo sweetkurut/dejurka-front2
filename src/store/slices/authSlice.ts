@@ -3,7 +3,8 @@ import { AuthState, User } from "../../types";
 
 const initialState: AuthState = {
     user: null,
-    token: localStorage.getItem("token"),
+    accessToken: localStorage.getItem("accessToken"),
+    refreshToken: localStorage.getItem("refreshToken"),
     isLoading: false,
     error: null,
 };
@@ -16,11 +17,17 @@ const authSlice = createSlice({
             state.isLoading = true;
             state.error = null;
         },
-        loginSuccess: (state, action: PayloadAction<{ user: User; token: string }>) => {
+        loginSuccess: (
+            state,
+            action: PayloadAction<{ user: User; accessToken: string; refreshToken: string }>
+        ) => {
             state.isLoading = false;
             state.user = action.payload.user;
-            state.token = action.payload.token;
-            localStorage.setItem("token", action.payload.token);
+            state.accessToken = action.payload.accessToken;
+            state.refreshToken = action.payload.refreshToken;
+
+            localStorage.setItem("accessToken", action.payload.accessToken);
+            localStorage.setItem("refreshToken", action.payload.refreshToken);
         },
         loginFailure: (state, action: PayloadAction<string>) => {
             state.isLoading = false;
@@ -28,8 +35,10 @@ const authSlice = createSlice({
         },
         logout: (state) => {
             state.user = null;
-            state.token = null;
-            localStorage.removeItem("token");
+            state.accessToken = null;
+            state.refreshToken = null;
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("refreshToken");
         },
     },
 });

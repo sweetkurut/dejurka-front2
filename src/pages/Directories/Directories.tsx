@@ -18,6 +18,7 @@ import {
     useGetDirectoriesQuery,
     useUpdateDirectoryMutation,
 } from "@/api/directoriesApi";
+import dayjs from "dayjs";
 
 const { Title } = Typography;
 const { TabPane } = Tabs;
@@ -29,31 +30,19 @@ const Directories: React.FC = () => {
     const [form] = Form.useForm();
 
     const { data: directories = [], isLoading } = useGetDirectoriesQuery(activeTab);
+    console.log("Active tab:", activeTab);
     const [createDirectory, { isLoading: isCreating }] = useCreateDirectoryMutation();
     const [updateDirectory, { isLoading: isUpdating }] = useUpdateDirectoryMutation();
     const [deleteDirectory] = useDeleteDirectoryMutation();
 
     const directoryTypes = [
-        {
-            key: "series",
-            label: "Серии домов",
-            icon: <HomeOutlined />,
-        },
-        {
-            key: "district",
-            label: "Районы",
-            icon: <EnvironmentOutlined />,
-        },
-        {
-            key: "document",
-            label: "Документы",
-            icon: <FileTextOutlined />,
-        },
-        {
-            key: "heating",
-            label: "Отопление",
-            icon: <FireOutlined />,
-        },
+        { key: "series", label: "Серии домов", icon: <HomeOutlined /> },
+        { key: "roomcount", label: "Комнаты", icon: <FireOutlined /> },
+        { key: "renovationtype", label: "Тип ремонта", icon: <EnvironmentOutlined /> },
+        { key: "document", label: "Документы", icon: <FileTextOutlined /> },
+        { key: "heatingtype", label: "Отопление", icon: <FireOutlined /> },
+        { key: "furnituretype", label: "Мебель", icon: <HomeOutlined /> },
+        { key: "district", label: "Районы", icon: <EnvironmentOutlined /> },
     ];
 
     const columns = [
@@ -67,7 +56,7 @@ const Directories: React.FC = () => {
             dataIndex: "createdAt",
             key: "createdAt",
             width: 150,
-            render: (date: string) => new Date(date).toLocaleDateString("ru-RU"),
+            render: (date: string) => dayjs(date).format("DD.MM.YYYY"),
         },
         {
             title: "Действия",
@@ -104,7 +93,7 @@ const Directories: React.FC = () => {
 
     const handleDelete = async (id: string) => {
         try {
-            await deleteDirectory(id).unwrap();
+            await deleteDirectory({ type: activeTab, id }).unwrap();
             message.success("Запись удалена");
         } catch (error) {
             message.error("Ошибка при удалении");
@@ -116,10 +105,10 @@ const Directories: React.FC = () => {
             const data = { ...values, type: activeTab };
 
             if (editingDirectory) {
-                await updateDirectory({ id: editingDirectory.id, data }).unwrap();
+                await updateDirectory({ type: activeTab, id: editingDirectory.id, data }).unwrap();
                 message.success("Запись обновлена");
             } else {
-                await createDirectory(data).unwrap();
+                await createDirectory({ type: activeTab, data }).unwrap();
                 message.success("Запись создана");
             }
 

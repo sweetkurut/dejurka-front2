@@ -26,6 +26,7 @@ import {
     useToggleUserStatusMutation,
     useUpdateUserMutation,
 } from "@/api/usersApi";
+import dayjs from "dayjs";
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -41,9 +42,11 @@ const Users: React.FC = () => {
     const [updateUser, { isLoading: isUpdating }] = useUpdateUserMutation();
     const [toggleUserStatus] = useToggleUserStatusMutation();
 
+    console.log(users);
+
     const columns = [
         {
-            title: "ФИО",
+            title: "Email",
             dataIndex: "fullName",
             key: "fullName",
             render: (name: string, record: User) => (
@@ -56,6 +59,14 @@ const Users: React.FC = () => {
                 </div>
             ),
         },
+
+        {
+            title: "ФИО",
+            dataIndex: "full_name",
+            key: "full_name",
+            render: (fullName: string) => <span>{fullName}</span>,
+        },
+
         {
             title: "Роль",
             dataIndex: "role",
@@ -77,13 +88,13 @@ const Users: React.FC = () => {
                 );
             },
         },
-        {
-            title: "Объектов",
-            dataIndex: "apartmentCount",
-            key: "apartmentCount",
-            width: 100,
-            render: (count: number) => <span className={styles.apartmentCount}>{count}</span>,
-        },
+        // {
+        //     title: "Объектов",
+        //     dataIndex: "apartmentCount",
+        //     key: "apartmentCount",
+        //     width: 100,
+        //     render: (count: number) => <span className={styles.apartmentCount}>{count}</span>,
+        // },
         {
             title: "Статус",
             dataIndex: "isActive",
@@ -98,7 +109,7 @@ const Users: React.FC = () => {
             dataIndex: "createdAt",
             key: "createdAt",
             width: 120,
-            render: (date: string) => new Date(date).toLocaleDateString("ru-RU"),
+            render: (date: string) => dayjs(date).format("DD.MM.YYYY"),
         },
         {
             title: "Действия",

@@ -2,9 +2,9 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { Directory } from "../types";
 
 const baseQuery = fetchBaseQuery({
-    baseUrl: "/api/directories",
+    baseUrl: "http://localhost:3000/references",
     prepareHeaders: (headers, { getState }) => {
-        const token = (getState() as any).auth.token;
+        const token = (getState() as any).auth.accessToken;
         if (token) {
             headers.set("authorization", `Bearer ${token}`);
         }
@@ -18,31 +18,30 @@ export const directoriesApi = createApi({
     tagTypes: ["Directory"],
     endpoints: (builder) => ({
         getDirectories: builder.query<Directory[], string | undefined>({
-            query: (type) => ({
-                url: "/",
-                params: type ? { type } : {},
-            }),
+            query: (type) => (type ? `/${type}` : "/"),
             providesTags: ["Directory"],
         }),
-        createDirectory: builder.mutation<Directory, Partial<Directory>>({
-            query: (data) => ({
-                url: "/",
+        createDirectory: builder.mutation<Directory, { type: string; data: Partial<Directory> }>({
+            query: ({ type, data }) => ({
+                url: `/${type}`,
                 method: "POST",
                 body: data,
             }),
             invalidatesTags: ["Directory"],
         }),
-        updateDirectory: builder.mutation<Directory, { id: string; data: Partial<Directory> }>({
-            query: ({ id, data }) => ({
-                url: `/${id}`,
+
+        updateDirectory: builder.mutation<Directory, { type: string; id: string; data: Partial<Directory> }>({
+            query: ({ type, id, data }) => ({
+                url: `/${type}/${id}`, // <-- type должен быть, например, "series", "district", "roomcount"
                 method: "PATCH",
                 body: data,
             }),
             invalidatesTags: ["Directory"],
         }),
-        deleteDirectory: builder.mutation<void, string>({
-            query: (id) => ({
-                url: `/${id}`,
+
+        deleteDirectory: builder.mutation<void, { type: string; id: string }>({
+            query: ({ type, id }) => ({
+                url: `/${type}/${id}`,
                 method: "DELETE",
             }),
             invalidatesTags: ["Directory"],

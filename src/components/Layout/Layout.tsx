@@ -26,6 +26,10 @@ const Layout: React.FC = () => {
     const { user } = useSelector((state: RootState) => state.auth);
     const { mode } = useSelector((state: RootState) => state.theme);
 
+    console.log("====================================");
+    console.log(user);
+    console.log("====================================");
+
     const { token } = theme.useToken();
 
     // ...
@@ -37,7 +41,7 @@ const Layout: React.FC = () => {
                 label: "Дашборд",
             },
             {
-                key: "/apartments",
+                key: "/all-apartments",
                 icon: <ApartmentOutlined />,
                 label: "Квартиры",
                 children: [
