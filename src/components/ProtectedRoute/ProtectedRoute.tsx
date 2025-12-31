@@ -6,19 +6,24 @@ import { RootState } from "../../store";
 
 interface ProtectedRouteProps {
     children?: React.ReactNode;
-    allowedRoles?: ("admin" | "manager" | "agent")[];
+    allowedRoles?: ("admin" | "agent")[];
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles = ["admin", "agent"] }) => {
-    const { user, accessToken } = useSelector((state: RootState) => state.auth);
+    const { user, accessToken, initialized } = useSelector((state: RootState) => state.auth);
 
+    // 🔥 если инициализация не завершена — показываем загрузку
+    if (!initialized) {
+        return <div>Загрузка...</div>;
+    }
+
+    // 🔥 если нет токена — редирект на login
     if (!accessToken) {
         return <Navigate to="/login" replace />;
     }
 
-    console.log("ProtectedRoute user:", user);
-
-    if (user && allowedRoles && !allowedRoles.includes(user.role)) {
+    // 🔥 если роль не разрешена
+    if (allowedRoles && user && !allowedRoles.includes(user.role)) {
         return (
             <Result
                 status="403"

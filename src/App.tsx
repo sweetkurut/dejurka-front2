@@ -13,7 +13,7 @@ import ApartmentDetail from "./pages/Apartments/ApartmentDetail/ApartmentDetail"
 import Users from "./pages/Users/Users";
 import Profile from "./pages/Profile/Profile";
 import Directories from "./pages/Directories/Directories";
-// import AdminRoute from "./components/AdminRoute/AdminRoute";
+import { useGetProfileQuery } from "./api/authApi";
 
 const ThemeWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { mode } = useSelector((state: RootState) => state.theme);
@@ -49,15 +49,30 @@ const ThemeWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 };
 
 const AppRoutes: React.FC = () => {
-    const { token } = useSelector((state: RootState) => state.auth);
+    const { accessToken } = useSelector((state: RootState) => state.auth);
+
+    // 🔥 всегда вызываем
+    const {
+        data: profile,
+        isLoading,
+        isError,
+    } = useGetProfileQuery(undefined, {
+        skip: !accessToken,
+    });
+
+    // 🔥 считаем инициализацию
+    const initialized = !accessToken || profile || isError;
+
+    if (!initialized) return <div>Загрузка...</div>;
 
     return (
         <Router>
             <Routes>
-                {/* Открытый маршрут для входа */}
-                <Route path="/login" element={token ? <Navigate to="/dashboard" replace /> : <Login />} />
+                <Route
+                    path="/login"
+                    element={accessToken ? <Navigate to="/dashboard" replace /> : <Login />}
+                />
 
-                {/* Основной маршрут для авторизованных пользователей */}
                 <Route
                     path="/"
                     element={
@@ -66,7 +81,6 @@ const AppRoutes: React.FC = () => {
                         </ProtectedRoute>
                     }
                 >
-                    {/* Общие маршруты */}
                     <Route index element={<Navigate to="/dashboard" replace />} />
                     <Route path="dashboard" element={<Dashboard />} />
                     <Route path="apartments" element={<Dashboard />} />
@@ -75,14 +89,13 @@ const AppRoutes: React.FC = () => {
                     <Route path="apartments/:id/edit" element={<ApartmentForm />} />
                     <Route path="profile" element={<Profile />} />
 
-                    {/* Маршруты только для администратора */}
+                    {/* Только для админа */}
                     <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
                         <Route path="users" element={<Users />} />
                         <Route path="directories" element={<Directories />} />
                     </Route>
                 </Route>
 
-                {/* Ловушка для неправильных URL */}
                 <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>
         </Router>

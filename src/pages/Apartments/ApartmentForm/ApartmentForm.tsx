@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from "react";
 import { Form, Input, Select, InputNumber, Switch, Upload, Button, Card, Row, Col, message } from "antd";
 import { UploadOutlined, SaveOutlined } from "@ant-design/icons";
@@ -27,7 +28,10 @@ const ApartmentForm: React.FC = () => {
     const { data: series = [] } = useGetDirectoriesQuery("series");
     const { data: districts = [] } = useGetDirectoriesQuery("district");
     const { data: documents = [] } = useGetDirectoriesQuery("document");
-    const { data: heating = [] } = useGetDirectoriesQuery("heating");
+    const { data: heating = [] } = useGetDirectoriesQuery("heatingtype");
+    const { data: furnituretype = [] } = useGetDirectoriesQuery("furnituretype");
+    const { data: roomcount = [] } = useGetDirectoriesQuery("roomcount");
+    const { data: renovationtype = [] } = useGetDirectoriesQuery("renovationtype");
 
     const [createApartment, { isLoading: isCreating }] = useCreateApartmentMutation();
     const [updateApartment, { isLoading: isUpdating }] = useUpdateApartmentMutation();
@@ -35,28 +39,70 @@ const ApartmentForm: React.FC = () => {
     useEffect(() => {
         if (apartment) {
             // Проверяем права доступа для редактирования
-            if (user?.role === "agent" && apartment.userId !== user.id) {
+            if (user?.role === "agent" && apartment.created_by?.id !== user.id) {
                 message.error("У вас нет прав для редактирования этого объекта");
                 navigate("/apartments");
-                return;
             }
-            form.setFieldsValue(apartment);
-            setSelectedSeries(apartment.series);
+
+            form.setFieldsValue({
+                series: apartment.series?.id ?? undefined,
+                district: apartment.district?.id ?? undefined,
+                roomcount: apartment.rooms_count?.id ?? undefined,
+                renovationtype: apartment.renovation_type?.id ?? undefined,
+                furnituretype: apartment.furniture?.id ?? undefined,
+                heating: apartment.heating_type?.id ?? undefined,
+                documents: apartment.documents?.map((d: any) => d.id) ?? [],
+                buildingCompany: apartment.buildingCompany ?? undefined,
+                residentialComplex: apartment.residentialComplex ?? undefined,
+                section: apartment.corner_type ?? undefined,
+                totalArea: apartment.area_total ?? undefined,
+                floor: apartment.floor_type ? Number(apartment.floor_type) : undefined,
+                totalFloors: apartment.totalFloors ?? undefined,
+                isBasement: apartment.isBasement ?? false,
+                isPenthouse: apartment.isPenthouse ?? false,
+                address: apartment.address ?? "",
+                description: apartment.description ?? "",
+                price: apartment.price_visible ?? 0,
+                priceNet: apartment.price_hidden ?? 0,
+                photos: apartment.photos?.map((p: any) => ({ name: p, url: p })) ?? [],
+            });
+
+            setSelectedSeries(apartment.series?.name ?? "");
         }
     }, [apartment, form, user, navigate]);
 
     const onFinish = async (values: any) => {
+        const payload = {
+            seriesId: values.series ?? "",
+            districtId: values.district ?? "",
+            renovationTypeId: values.renovationtype ?? "",
+            roomsCountId: values.roomcount ?? "",
+            heatingTypeId: values.heating ?? "",
+            furnitureId: values.furnituretype ?? "",
+            documentsIds: values.documents?.length ? values.documents : [],
+            area_total: values.totalArea,
+            floor_type: values.floor?.toString() ?? "",
+            corner_type: values.section ?? null,
+            address: values.address ?? "",
+            description: values.description ?? "",
+            price_visible: values.price ?? 0,
+            price_hidden: user?.role === "admin" ? values.priceNet ?? 0 : 0,
+            photos:
+                Array.isArray(values.photos) && values.photos.length
+                    ? values.photos.map((f: any) => f.name)
+                    : [],
+        };
+
         try {
             if (isEditing) {
-                await updateApartment({ id: id!, data: values }).unwrap();
-                message.success("Объект успешно обновлен");
+                await updateApartment({ id: id!, data: payload }).unwrap();
             } else {
-                await createApartment(values).unwrap();
-                message.success("Объект успешно создан");
+                await createApartment(payload).unwrap();
             }
+            message.success("Успешно сохранено");
             navigate("/apartments");
-        } catch (error) {
-            message.error("Произошла ошибка при сохранении");
+        } catch {
+            message.error("Ошибка сохранения");
         }
     };
 
@@ -72,20 +118,27 @@ const ApartmentForm: React.FC = () => {
 
     const isElite = selectedSeries === "Элитка";
 
-    const repairOptions = [
-        { value: "designer", label: "Дизайнерский" },
-        { value: "euro", label: "Евроремонт" },
-        { value: "good", label: "Хорошее состояние" },
-        { value: "cosmetic", label: "Косметика" },
-        { value: "pso", label: "ПСО" },
-        { value: "old", label: "Старый ремонт" },
-    ];
+    // const repairOptions = [
+    //     { value: "designer", label: "Дизайнерский" },
+    //     { value: "euro", label: "Евроремонт" },
+    //     { value: "good", label: "Хорошее состояние" },
+    //     { value: "cosmetic", label: "Косметика" },
+    //     { value: "pso", label: "ПСО" },
+    //     { value: "old", label: "Старый ремонт" },
+    // ];
 
-    const furnitureOptions = [
-        { value: "full", label: "Полностью меблированная" },
-        { value: "partial", label: "Частично меблированная" },
-        { value: "none", label: "Без мебели" },
-    ];
+    // const furnitureOptions = [
+    //     { value: "full", label: "Полностью меблированная" },
+    //     { value: "partial", label: "Частично меблированная" },
+    //     { value: "none", label: "Без мебели" },
+    // ];
+
+    const normFile = (e: any) => {
+        if (Array.isArray(e)) {
+            return e;
+        }
+        return e?.fileList;
+    };
 
     return (
         <Card title={isEditing ? "Редактировать объект" : "Добавить объект"}>
@@ -99,7 +152,7 @@ const ApartmentForm: React.FC = () => {
                         >
                             <Select placeholder="Выберите серию" onChange={handleSeriesChange}>
                                 {series.map((item) => (
-                                    <Option key={item.id} value={item.name}>
+                                    <Option key={item.id} value={item.id}>
                                         {item.name}
                                     </Option>
                                 ))}
@@ -115,7 +168,7 @@ const ApartmentForm: React.FC = () => {
                         >
                             <Select placeholder="Выберите район">
                                 {districts.map((item) => (
-                                    <Option key={item.id} value={item.name}>
+                                    <Option key={item.id} value={item.id}>
                                         {item.name}
                                     </Option>
                                 ))}
@@ -124,7 +177,7 @@ const ApartmentForm: React.FC = () => {
                     </Col>
                 </Row>
 
-                {isElite && (
+                {/* {isElite && (
                     <Row gutter={16}>
                         <Col span={12}>
                             <Form.Item
@@ -146,7 +199,7 @@ const ApartmentForm: React.FC = () => {
                             </Form.Item>
                         </Col>
                     </Row>
-                )}
+                )} */}
 
                 {!isElite && (
                     <Row gutter={16}>
@@ -157,8 +210,8 @@ const ApartmentForm: React.FC = () => {
                                 rules={[{ required: true, message: "Выберите расположение" }]}
                             >
                                 <Select placeholder="Выберите расположение">
-                                    <Option value="corner">Угловая</Option>
-                                    <Option value="not-corner">Не угловая</Option>
+                                    <Option value="угловая">Угловая</Option>
+                                    <Option value="не угловая">Не угловая</Option>
                                 </Select>
                             </Form.Item>
                         </Col>
@@ -168,14 +221,14 @@ const ApartmentForm: React.FC = () => {
                 <Row gutter={16}>
                     <Col span={12}>
                         <Form.Item
-                            name="repair"
+                            name="renovationtype"
                             label="Ремонт"
                             rules={[{ required: true, message: "Выберите состояние ремонта" }]}
                         >
                             <Select placeholder="Выберите состояние ремонта">
-                                {repairOptions.map((option) => (
-                                    <Option key={option.value} value={option.value}>
-                                        {option.label}
+                                {renovationtype.map((option) => (
+                                    <Option key={option.id} value={option.id}>
+                                        {option.name}
                                     </Option>
                                 ))}
                             </Select>
@@ -184,14 +237,14 @@ const ApartmentForm: React.FC = () => {
 
                     <Col span={12}>
                         <Form.Item
-                            name="rooms"
+                            name="roomcount"
                             label="Количество комнат"
                             rules={[{ required: true, message: "Выберите количество комнат" }]}
                         >
                             <Select placeholder="Количество комнат">
-                                {[1, 2, 3, 4, 5].map((num) => (
-                                    <Option key={num} value={num}>
-                                        {num} комн.
+                                {roomcount.map((option) => (
+                                    <Option key={option.id} value={option.id}>
+                                        {option.name}
                                     </Option>
                                 ))}
                             </Select>
@@ -262,7 +315,7 @@ const ApartmentForm: React.FC = () => {
                         <Form.Item name="documents" label="Документы">
                             <Select mode="multiple" placeholder="Выберите документы" allowClear>
                                 {documents.map((item) => (
-                                    <Option key={item.id} value={item.name}>
+                                    <Option key={item.id} value={item.id}>
                                         {item.name}
                                     </Option>
                                 ))}
@@ -278,7 +331,7 @@ const ApartmentForm: React.FC = () => {
                         >
                             <Select placeholder="Выберите тип отопления">
                                 {heating.map((item) => (
-                                    <Option key={item.id} value={item.name}>
+                                    <Option key={item.id} value={item.id}>
                                         {item.name}
                                     </Option>
                                 ))}
@@ -287,11 +340,11 @@ const ApartmentForm: React.FC = () => {
                     </Col>
                 </Row>
 
-                <Form.Item name="furniture" label="Мебель">
+                <Form.Item name="furnituretype" label="Мебель">
                     <Select placeholder="Выберите наличие мебели">
-                        {furnitureOptions.map((option) => (
-                            <Option key={option.value} value={option.value}>
-                                {option.label}
+                        {furnituretype.map((option) => (
+                            <Option key={option.id} value={option.id}>
+                                {option.name}
                             </Option>
                         ))}
                     </Select>
@@ -331,7 +384,12 @@ const ApartmentForm: React.FC = () => {
                     )}
                 </Row>
 
-                <Form.Item name="photos" label="Фотографии">
+                <Form.Item
+                    name="photos"
+                    label="Фотографии"
+                    valuePropName="fileList"
+                    getValueFromEvent={normFile}
+                >
                     <Upload multiple listType="picture-card" beforeUpload={() => false}>
                         <div>
                             <UploadOutlined />

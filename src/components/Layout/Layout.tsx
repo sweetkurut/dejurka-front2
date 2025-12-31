@@ -1,5 +1,5 @@
 import React from "react";
-import { Layout as AntLayout, Menu, Avatar, Dropdown, Button, theme } from "antd";
+import { Layout as AntLayout, Menu, Avatar, Dropdown, Button, theme, Spin } from "antd";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -23,7 +23,7 @@ const Layout: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const dispatch = useDispatch();
-    const { user } = useSelector((state: RootState) => state.auth);
+    const { user, initialized } = useSelector((state: RootState) => state.auth);
     const { mode } = useSelector((state: RootState) => state.theme);
 
     console.log("====================================");
@@ -32,6 +32,13 @@ const Layout: React.FC = () => {
 
     const { token } = theme.useToken();
 
+    if (!initialized) {
+        return (
+            <div style={{ height: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Spin size="large" />
+            </div>
+        );
+    }
     // ...
     const getMenuItems = () => {
         const menuItems = [

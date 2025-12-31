@@ -49,11 +49,12 @@ export interface LoginRequest {
 }
 
 export interface AuthState {
-  user: User | null;
-  accessToken: string | null;
-  refreshToken: string | null;
-  isLoading: boolean;
-  error: string | null;
+    user: User | null;
+    accessToken: string | null;
+    refreshToken: string | null;
+    isLoading: boolean;
+    error: string | null;
+    initialized: boolean;
 }
 
 export interface Theme {

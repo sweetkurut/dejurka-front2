@@ -1,12 +1,6 @@
 import React from "react";
 import { Card, Row, Col, Tag, Button, Space, Image, Descriptions, Typography, Spin, Alert } from "antd";
-import {
-    EditOutlined,
-    ArrowLeftOutlined,
-    HomeOutlined,
-    UserOutlined,
-    CalendarOutlined,
-} from "@ant-design/icons";
+import { EditOutlined, ArrowLeftOutlined, UserOutlined, CalendarOutlined } from "@ant-design/icons";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../store";
@@ -19,7 +13,6 @@ import {
 } from "../../../utils/helpers";
 import styles from "./ApartmentDetail.module.scss";
 import { useGetApartmentQuery } from "@/api/apartmentsApi";
-import dayjs from "dayjs";
 
 const { Title, Text } = Typography;
 
@@ -30,20 +23,17 @@ const ApartmentDetail: React.FC = () => {
 
     const { data: apartment, isLoading, error } = useGetApartmentQuery(id!);
 
-    if (isLoading) {
+    if (isLoading)
         return (
             <div className={styles.loading}>
                 <Spin size="large" />
             </div>
         );
-    }
-
-    if (error || !apartment) {
+    if (error || !apartment)
         return <Alert message="Ошибка" description="Объект не найден" type="error" showIcon />;
-    }
 
     const getRepairColor = (repair: string) => {
-        const colors = {
+        const colors: Record<string, string> = {
             designer: "purple",
             euro: "blue",
             good: "green",
@@ -51,7 +41,7 @@ const ApartmentDetail: React.FC = () => {
             pso: "red",
             old: "default",
         };
-        return colors[repair as keyof typeof colors] || "default";
+        return colors[repair] || "default";
     };
 
     return (
@@ -67,12 +57,12 @@ const ApartmentDetail: React.FC = () => {
                     </Button>
                     <div className={styles.titleSection}>
                         <Title level={2} className={styles.title}>
-                            {getRoomLabel(apartment.rooms)} квартира
+                            {getRoomLabel(apartment.rooms_count?.name ?? "")} квартира
                         </Title>
                         <Text type="secondary">ID: #{apartment.id.slice(-8)}</Text>
                     </div>
                 </div>
-                {(user?.role === "admin" || apartment.userId === user?.id) && (
+                {(user?.role === "admin" || apartment.created_by?.id === user?.id) && (
                     <Button
                         type="primary"
                         icon={<EditOutlined />}
@@ -90,38 +80,30 @@ const ApartmentDetail: React.FC = () => {
                             <Descriptions.Item label="Адрес" span={2}>
                                 <Text strong>{apartment.address}</Text>
                             </Descriptions.Item>
-                            <Descriptions.Item label="Серия">{apartment.series}</Descriptions.Item>
-                            <Descriptions.Item label="Район">{apartment.district}</Descriptions.Item>
+                            <Descriptions.Item label="Серия">
+                                {apartment.series?.name ?? "-"}
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Район">
+                                {apartment.district?.name ?? "-"}
+                            </Descriptions.Item>
                             <Descriptions.Item label="Комнат">
-                                {getRoomLabel(apartment.rooms)}
+                                {getRoomLabel(apartment.rooms_count?.name ?? "")}
                             </Descriptions.Item>
-                            <Descriptions.Item label="Площадь">{apartment.totalArea} м²</Descriptions.Item>
-                            <Descriptions.Item label="Этаж">
-                                {apartment.floor} из {apartment.totalFloors}
-                            </Descriptions.Item>
+                            <Descriptions.Item label="Площадь">{apartment.area_total} м²</Descriptions.Item>
+                            <Descriptions.Item label="Этаж">{apartment.floor_type ?? "-"}</Descriptions.Item>
                             <Descriptions.Item label="Ремонт">
-                                <Tag color={getRepairColor(apartment.repair)}>
-                                    {getRepairLabel(apartment.repair)}
+                                <Tag color={getRepairColor(apartment.renovation_type?.name ?? "")}>
+                                    {getRepairLabel(apartment.renovation_type?.name ?? "")}
                                 </Tag>
                             </Descriptions.Item>
-                            {apartment.buildingCompany && (
-                                <Descriptions.Item label="Стройкомпания">
-                                    {apartment.buildingCompany}
-                                </Descriptions.Item>
-                            )}
-                            {apartment.residentialComplex && (
-                                <Descriptions.Item label="ЖК">
-                                    {apartment.residentialComplex}
-                                </Descriptions.Item>
-                            )}
-                            {apartment.section && (
-                                <Descriptions.Item label="Расположение">
-                                    {apartment.section === "corner" ? "Угловая" : "Не угловая"}
-                                </Descriptions.Item>
-                            )}
-                            <Descriptions.Item label="Отопление">{apartment.heating}</Descriptions.Item>
+                            <Descriptions.Item label="Расположение">
+                                {apartment.corner_type ?? "-"}
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Отопление">
+                                {apartment.heating_type?.name ?? "-"}
+                            </Descriptions.Item>
                             <Descriptions.Item label="Мебель">
-                                {getFurnitureLabel(apartment.furniture)}
+                                {getFurnitureLabel(apartment.furniture?.name ?? "-")}
                             </Descriptions.Item>
                         </Descriptions>
 
@@ -133,32 +115,34 @@ const ApartmentDetail: React.FC = () => {
                         )}
                     </Card>
 
-                    {apartment.photos && apartment.photos.length > 0 && (
-                        <Card title="Фотографии" className={styles.photosCard}>
+                    <Card title="Фотографии" className={styles.photosCard}>
+                        {apartment.photos && apartment.photos.length > 0 ? (
                             <div className={styles.photoGrid}>
-                                {apartment.photos.map((photo, index) => (
+                                {apartment.photos.map((photo, idx) => (
                                     <Image
-                                        key={index}
+                                        key={idx}
                                         src={photo}
-                                        alt={`Фото ${index + 1}`}
+                                        alt={`Фото ${idx + 1}`}
                                         className={styles.photo}
                                     />
                                 ))}
                             </div>
-                        </Card>
-                    )}
+                        ) : (
+                            <Text>Фото нет</Text>
+                        )}
+                    </Card>
                 </Col>
 
                 <Col xs={24} lg={8}>
                     <Card className={styles.priceCard}>
                         <div className={styles.priceSection}>
                             <Title level={3} className={styles.price}>
-                                {formatPrice(apartment.price)}
+                                {formatPrice(apartment.price_visible)}
                             </Title>
-                            {apartment.priceNet &&
-                                (user?.role === "admin" || apartment.userId === user?.id) && (
+                            {apartment.price_hidden &&
+                                (user?.role === "admin" || apartment.created_by?.id === user?.id) && (
                                     <Text type="secondary" className={styles.priceNet}>
-                                        На руки: {formatPrice(apartment.priceNet)}
+                                        На руки: {formatPrice(apartment.price_hidden)}
                                     </Text>
                                 )}
                         </div>
@@ -166,26 +150,17 @@ const ApartmentDetail: React.FC = () => {
 
                     <Card title="Дополнительно" className={styles.additionalCard}>
                         <Space direction="vertical" size="middle" style={{ width: "100%" }}>
-                            {apartment.isBasement && (
-                                <Tag color="orange" icon={<HomeOutlined />}>
-                                    Цокольный этаж
-                                </Tag>
-                            )}
-                            {apartment.isPenthouse && (
-                                <Tag color="gold" icon={<HomeOutlined />}>
-                                    Пентхаус
-                                </Tag>
-                            )}
-
-                            {apartment.documents && apartment.documents.length > 0 && (
+                            {apartment.documents && apartment.documents.length > 0 ? (
                                 <div>
                                     <Text strong>Документы:</Text>
                                     <div className={styles.documents}>
-                                        {apartment.documents.map((doc, index) => (
-                                            <Tag key={index}>{doc}</Tag>
+                                        {apartment.documents.map((doc) => (
+                                            <Tag key={doc.id}>{doc.name}</Tag>
                                         ))}
                                     </div>
                                 </div>
+                            ) : (
+                                <Text>Документы отсутствуют</Text>
                             )}
                         </Space>
                     </Card>
@@ -194,9 +169,9 @@ const ApartmentDetail: React.FC = () => {
                         <div className={styles.agentInfo}>
                             <UserOutlined className={styles.agentIcon} />
                             <div>
-                                <Text strong>{apartment.user.fullName}</Text>
+                                <Text strong>{apartment.created_by?.full_name ?? "Не указано"}</Text>
                                 <br />
-                                <Text type="secondary">{apartment.user.email}</Text>
+                                <Text type="secondary">{apartment.created_by?.email ?? "-"}</Text>
                             </div>
                         </div>
                     </Card>
@@ -205,11 +180,15 @@ const ApartmentDetail: React.FC = () => {
                         <Space direction="vertical" size="small">
                             <div className={styles.metaItem}>
                                 <CalendarOutlined />
-                                <Text type="secondary">Создано: {apartment.createdAt}</Text>
+                                <Text type="secondary">
+                                    Создано: {apartment.created_at ? formatDate(apartment.created_at) : "-"}
+                                </Text>
                             </div>
                             <div className={styles.metaItem}>
                                 <CalendarOutlined />
-                                <Text type="secondary">Обновлено: {apartment.updatedAt}</Text>
+                                <Text type="secondary">
+                                    Обновлено: {apartment.updated_at ? formatDate(apartment.updated_at) : "-"}
+                                </Text>
                             </div>
                         </Space>
                     </Card>

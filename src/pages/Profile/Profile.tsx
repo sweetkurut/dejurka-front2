@@ -63,6 +63,7 @@ const Profile: React.FC = () => {
             dataIndex: "address",
             key: "address",
             ellipsis: true,
+            width: 120,
         },
         {
             title: "Комнат",

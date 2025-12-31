@@ -1,25 +1,27 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from "react";
-import { Typography, Card, Statistic, Table, Input, Select, Button, Space, Tag, Tooltip } from "antd";
+import { Typography, Card, Table, Input, Select, Button, Space, Tooltip, Popconfirm, message } from "antd";
 import {
     ApartmentOutlined,
     UserOutlined,
-    DollarOutlined,
     EyeOutlined,
     EditOutlined,
     SearchOutlined,
+    DeleteOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store";
 
-import { formatPrice, getRoomLabel, getRepairLabel } from "../../utils/helpers";
+// import { formatPrice, getRoomLabel, getRepairLabel } from "../../utils/helpers";
 import styles from "./Dashboard.module.scss";
-import { useGetApartmentsQuery } from "@/api/apartmentsApi";
-import { Apartment, ApartmentFilters } from "@/types";
+import { useDeleteApartmentMutation, useGetApartmentsQuery } from "@/api/apartmentsApi";
+import { ApartmentFilters } from "@/types";
 import { useGetDirectoriesQuery } from "@/api/directoriesApi";
+import { useGetUsersQuery } from "@/api/usersApi";
 
 const { Title } = Typography;
+const { Option } = Select;
 
 const Dashboard: React.FC = () => {
     const navigate = useNavigate();
@@ -36,8 +38,23 @@ const Dashboard: React.FC = () => {
         filters: queryFilters,
     });
 
+    const { data: roomcount = [] } = useGetDirectoriesQuery("roomcount");
+
     const { data: series = [] } = useGetDirectoriesQuery("series");
     const { data: districts = [] } = useGetDirectoriesQuery("district");
+    const { data: users = [] } = useGetUsersQuery("users");
+    const [deleteApartment] = useDeleteApartmentMutation();
+
+    const handleDelete = async (id: string) => {
+        try {
+            await deleteApartment(id).unwrap();
+            message.success("Запись удалена");
+        } catch (error) {
+            console.error(error);
+
+            message.error("Ошибка при удалении");
+        }
+    };
 
     const columns = [
         {
@@ -56,6 +73,7 @@ const Dashboard: React.FC = () => {
             dataIndex: "address",
             key: "address",
             ellipsis: true,
+            width: 120,
         },
         {
             title: "Серия",
@@ -67,14 +85,16 @@ const Dashboard: React.FC = () => {
             title: "Район",
             key: "district",
             render: (_: any, record: any) => record.district?.name || "—",
-            width: 150,
+            width: 120,
         },
+
         {
             title: "Комнат",
             key: "rooms_count",
-            render: (_: any, record: any) => record.rooms_count.count || "—",
+            render: (_: any, record: any) => record.rooms_count?.name ?? "—",
             width: 80,
         },
+
         {
             title: "Площадь",
             dataIndex: "area_total",
@@ -125,9 +145,20 @@ const Dashboard: React.FC = () => {
                             type="text"
                             icon={<EditOutlined />}
                             onClick={() => navigate(`/apartments/${record.id}/edit`)}
-                            disabled={user?.role === "agent" && record.userId !== user.id}
+                            // disabled={user?.role === "agent" && record.userId !== user.id}
                         />
                     </Tooltip>
+                    <Space size="small">
+                        <Popconfirm
+                            title="Удалить запись?"
+                            description="Это действие нельзя отменить"
+                            onConfirm={() => handleDelete(record.id)}
+                            okText="Да"
+                            cancelText="Отмена"
+                        >
+                            <Button type="text" icon={<DeleteOutlined />} danger />
+                        </Popconfirm>
+                    </Space>
                 </Space>
             ),
         },
@@ -155,7 +186,7 @@ const Dashboard: React.FC = () => {
 
     const mockStats = {
         totalApartments: apartmentsData?.total || 0,
-        totalUsers: 15,
+        totalUsers: users?.length || 0,
         averagePrice: 2500000,
         newThisMonth: 5,
     };
@@ -188,13 +219,13 @@ const Dashboard: React.FC = () => {
                     <h2 className={styles.statValue}>{mockStats.totalUsers}</h2>
                 </Card>
 
-                <Card className={styles.statCard}>
+                {/* <Card className={styles.statCard}>
                     <div className={styles.statHeader}>
                         <h4 className={styles.statTitle}>Средняя цена</h4>
                         <DollarOutlined className={styles.statIcon} />
                     </div>
                     <h2 className={styles.statValue}>{formatPrice(mockStats.averagePrice)}</h2>
-                </Card>
+                </Card> */}
 
                 <Card className={styles.statCard}>
                     <div className={styles.statHeader}>
@@ -247,12 +278,20 @@ const Dashboard: React.FC = () => {
                     onChange={(value) => handleFilterChange("rooms", value)}
                     className={styles.filterItem}
                 >
-                    {[1, 2, 3, 4, 5].map((num) => (
-                        <Select.Option key={num} value={num}>
-                            {getRoomLabel(num)}
-                        </Select.Option>
+                    {roomcount.map((option) => (
+                        <Option key={option.id} value={option.id}>
+                            {option.name}
+                        </Option>
                     ))}
                 </Select>
+
+                {/* <Select placeholder="Количество комнат">
+                    {roomcount.map((option) => (
+                        <Option key={option.id} value={option.id}>
+                            {option.name}
+                        </Option>
+                    ))}
+                </Select> */}
             </div>
 
             <Table
